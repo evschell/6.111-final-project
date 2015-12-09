@@ -9,9 +9,14 @@ module Peakfinder(
 	output reg [7:0]tempo,
 	output reg beat);
 	
-	parameter THRESHOLD_ENERGY = 580;
+	//peakfinder is a different approach to finding beats
+	//looks at energy coming in for each byte sample and compares to constant THRESHOLD_ENERGY
+	//asserts that a beat has occurred when energy of a byte is above THRESHOLD_ENERGY
+	
+	parameter THRESHOLD_ENERGY = 15000;
 	reg [2:0]tap = 2'd0;
 	reg signed [15:0]energy;
+	initial tempo = 8'd120;
 	
 //	reg signed [15:0]energy60 = 16'd0;
 //	reg signed [15:0]energy90 = 16'd0;
@@ -19,8 +24,6 @@ module Peakfinder(
 //	reg signed [15:0]energy180 = 16'd0;
 //	reg signed [15:0]energy210 = 16'd0;
 //	reg signed [15:0]energy240 = 16'd0;
-	
-	initial tempo = 8'd120;
 	
 	always @(posedge clk)
 		begin
@@ -55,11 +58,14 @@ module Peakfinder(
 			end
 		if (tap == 1)
 			begin
-			energy <= energy60+energy90+energy120+energy180+energy210+energy240;
+			//sum energy at each tempo
+			//energy <= energy60+energy90+energy120+energy180+energy210+energy240;
+			energy <= energy120;
 			tap <= 2;
 			end
 		if (tap == 2)
 			begin
+			//compare byte energy to threshold
 			if (energy > THRESHOLD_ENERGY)
 				begin
 				beat <= 1;
@@ -89,6 +95,15 @@ module Peakpicker(
 	output reg [7:0]tempo,
 	output reg beat);
 	
+	//sums squared inputs over time to calculate energy of each comb filter output
+	//tempo with highest sum is fundemental tempo
+
+	initial tempo = 8'd0;
+	reg [3:0]tap = 0;
+
+	reg signed [21:0]max_energy = 0;
+	reg [12:0]counter_max;
+	reg [12:0]counter;
 	
 	reg signed [21:0]energy60 = 0;
 	reg signed [21:0]energy90 = 0;
@@ -103,13 +118,6 @@ module Peakpicker(
 //	reg signed [21:0]byte_energy180 = 0;
 //	reg signed [21:0]byte_energy210 = 0;
 //	reg signed [21:0]byte_energy240 = 0;	
-	initial tempo = 8'd0;
-	reg [3:0]tap = 0;
-
-	reg signed [21:0]max_energy = 0;
-	reg [12:0]counter_max;
-	reg [12:0]counter;
-
 
 		always @(posedge clk)
 			begin
@@ -128,7 +136,7 @@ module Peakpicker(
 				end
 			else if (ready)
 				begin
-				//calculate energy this byte for each tempo
+				//calculate energy of this byte for each tempo
 				byte_energy60 <= (comb00*comb00) + (comb10*comb10) 
 				+ (comb20*comb20) + (comb30*comb30) 
 				+ (comb40*comb40);
@@ -259,42 +267,3 @@ module Peakpicker(
 			end
 	
 endmodule
-
-
-	
-//	reg [21:0]high_energy = 0;
-
-	
-
-	
-	//for now implement non-rolling
-	//mybram #(.LOGSIZE(MEM_LOGSIZE),.WIDTH(MEM_WIDTH))
-	//	mybram1(.addr(addr),.clk(clock),.din(memin),.dout(memout),.we(we));
-		
-				
-				//pick tempo with highest energy
-//				if (energy60>energy90 && energy60>energy120 && energy60>energy180 && energy60>energy210 && energy60>energy240)
-//					tempo <= 60;
-//				if (energy90>energy60 && energy90>energy120 && energy90>energy180 && energy90>energy210 && energy90>energy240)
-//					tempo <= 90;
-//				if (energy120>energy60 && energy120>energy90 && energy120>energy180 && energy120>energy210 && energy120>energy240)
-//					tempo <= 120;
-//				if (energy180>energy60 && energy180>energy90 && energy180>energy120 && energy180>energy210 && energy180>energy240)
-//					tempo <= 180;
-//				if (energy210>energy60 && energy210>energy90 && energy210>energy120 && energy210>energy180 && energy210>energy240)
-//					tempo <= 210;
-//				if (energy240>energy60 && energy240>energy90 && energy240>energy120 && energy240>energy180 && energy240>energy210)
-//					tempo <= 240;
-//				
-//				case(tempo)
-//					60: high_energy <= byte_energy60;
-//					90: high_energy <= byte_energy90;
-//					120: high_energy <= byte_energy120;
-//					180: high_energy <= byte_energy180;
-//					210: high_energy <= byte_energy210;
-//					240: high_energy <= byte_energy240;
-//				endcase
-//				
-//				if (high_energy > max_energy) beat <= 1;
-//				else beat <= 0;
-
