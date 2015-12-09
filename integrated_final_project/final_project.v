@@ -689,13 +689,13 @@ module final_project   (beep, audio_reset_b, ac97_sdata_out, ac97_sdata_in, ac97
 	
 	// output useful things to the logic analyzer connectors
    assign analyzer3_clock = clock_27mhz;
-   assign analyzer3_data = {lowpassed,filtband4};
+   assign analyzer3_data = {filtband0,hann_out};
 	assign analyzer1_clock = ready;
-	assign analyzer1_data = {hann_out,diff_out};
+	assign analyzer1_data = {diff_out,7'd0,beat};
 	//assign analyzer4_clock = sixk_ready;
-	assign analyzer4_data = {comb40,comb41};
+	assign analyzer4_data = {eng60};
 	assign analyzer2_clock = sixk_ready;
-   assign analyzer2_data = {eng60};
+   assign analyzer2_data = {eng120};
 	
 	//lowpass audio by half of sampling frequency as it comes in
 	lowpass3k LP(.clock(clock_27mhz),.reset(hard_reset),.ready(ready),.x(from_ac97_data),.y(lowpassed));
@@ -854,12 +854,8 @@ module final_project   (beep, audio_reset_b, ac97_sdata_out, ac97_sdata_in, ac97
 			if (count == temp) begin
 				count <= 0;
 			end
-			if (col_count == 6) begin
-				shift <= 1;
-				col_count <=0;	end
-			if (col_count < 6) begin
-				col_count <= col_count + 1; 
-				shift <= 0; end
+			if (beat_state==BEAT) shift <= 1;				
+			if (beat_state==RESET) shift <= 0;
 			addr_count <= addr_count+1;			
 		end	
 				
