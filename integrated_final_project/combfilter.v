@@ -39,9 +39,8 @@ module CombFilter
 	
 	mybram #(.LOGSIZE(14),.WIDTH(8))
 		mybram1(.addr(addr),.clk(clk),.din(memin),.dout(memout),.we(we));
+
 	
-//	assign memin = x;
-//	
 	always @(posedge clk)
 		begin
 		if (ready && tap==0)
