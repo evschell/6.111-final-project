@@ -1,7 +1,7 @@
 module AudioProcessingUnit
     (input clk, reset, ready, 
 	 input signed [7:0]bandx,
-    output wire signed [7:0]comb60,comb90,comb120,comb180,comb210,comb240,
+    	 output signed [7:0]comb60,comb90,comb120,comb180,comb210,comb240,
 	 output signed [7:0] hann_clip,diff_out,fw_rect_band,hw_rect_band);
 	 
 	//define signals
